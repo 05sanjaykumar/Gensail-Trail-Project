@@ -20,5 +20,5 @@ pip install -r requirements.txt
 # To run app
 
 ```
-uvicorn main:app --reload
+python -m uvicorn main:app --reload
 ```

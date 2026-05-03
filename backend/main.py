@@ -1,11 +1,10 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI
+from routes.audio import router as audio_router
 
 app = FastAPI()
 
-@app.get("/")
-def read_root():
-    return {"message": "Backend running 🚀"}
+app.include_router(audio_router)
 
-@app.post("/process-audio")
-async def process_audio(file: UploadFile = File(...)):
-    return {"message": "Audio received"}
+@app.get("/")
+def root():
+    return {"status": "running 🚀"}

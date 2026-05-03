@@ -4,6 +4,7 @@ python-multipart
 
 openai-whisper
 ollama
+groq
 
 TTS
 soundfile

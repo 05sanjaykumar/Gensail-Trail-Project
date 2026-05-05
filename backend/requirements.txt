@@ -1,11 +1,17 @@
+# Server
 fastapi
 uvicorn
 python-multipart
+pydantic
 
-openai-whisper
-ollama
+# Pipecat with all needed services
+pipecat-ai[kokoro,nvidia,silero,webrtc]
+
+# LLM
 groq
 
-TTS
+# Audio
 soundfile
-pydantic
+
+# Env
+python-dotenv

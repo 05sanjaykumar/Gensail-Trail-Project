@@ -1,65 +1,170 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useRef, useState, useCallback } from "react";
+import { PipecatClient } from "@pipecat-ai/client-js";
+import {
+  WebSocketTransport,
+  ProtobufFrameSerializer,
+} from "@pipecat-ai/websocket-transport";
+
+type Status = "idle" | "connecting" | "listening" | "speaking" | "error";
 
 export default function Home() {
+  const clientRef = useRef<PipecatClient | null>(null);
+  const [status, setStatus] = useState<Status>("idle");
+  const [transcript, setTranscript] = useState("");
+  const [botReply, setBotReply] = useState("");
+  const [error, setError] = useState("");
+
+  const WS_URL =
+    process.env.NEXT_PUBLIC_BACKEND_WS_URL || "ws://localhost:8000/api/ws/voice";
+
+  const initClient = useCallback(() => {
+    const client = new PipecatClient({
+      transport: new WebSocketTransport({
+        serializer: new ProtobufFrameSerializer(),
+        recorderSampleRate: 16000,
+        playerSampleRate: 16000,
+      }),
+      enableMic: true,
+      enableCam: false,
+      callbacks: {
+        onConnected: () => setStatus("listening"),
+        onDisconnected: () => setStatus("idle"),
+        onError: (err) => {
+          setError(String(err));
+          setStatus("error");
+        },
+        onBotStartedSpeaking: () => setStatus("speaking"),
+        onBotStoppedSpeaking: () => setStatus("listening"),
+        onUserStartedSpeaking: () => setTranscript(""),
+        onUserTranscript: (data) => {
+          if (data.final) setTranscript(data.text);
+        },
+        onBotTranscript: (data) => setBotReply(data.text),
+      },
+    });
+
+    clientRef.current = client;
+  }, []);
+
+  useEffect(() => {
+    initClient();
+    return () => {
+      clientRef.current?.disconnect();
+    };
+  }, [initClient]);
+
+  const handleConnect = async () => {
+    try {
+      setStatus("connecting");
+      setError("");
+      await clientRef.current?.connect({ wsUrl: WS_URL });
+    } catch (e) {
+      setError(String(e));
+      setStatus("error");
+    }
+  };
+
+  const handleDisconnect = async () => {
+    await clientRef.current?.disconnect();
+    setStatus("idle");
+    setTranscript("");
+    setBotReply("");
+  };
+
+  const isActive = status === "listening" || status === "speaking";
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <main className="min-h-screen bg-[#0f0f0f] text-white flex flex-col items-center justify-center px-4">
+      {/* Header */}
+      <div className="mb-12 text-center">
+        <h1 className="text-3xl font-semibold tracking-tight text-white">
+          Gensail Voice AI
+        </h1>
+        <p className="text-sm text-zinc-500 mt-1">
+          Low-latency voice agent · Single environment
+        </p>
+      </div>
+
+      {/* Mic Button */}
+      <button
+        onClick={isActive ? handleDisconnect : handleConnect}
+        disabled={status === "connecting"}
+        className={`
+          relative w-24 h-24 rounded-full flex items-center justify-center
+          transition-all duration-300 cursor-pointer
+          ${status === "idle" || status === "error"
+            ? "bg-zinc-800 hover:bg-zinc-700 border border-zinc-600"
+            : status === "connecting"
+            ? "bg-zinc-800 border border-zinc-600 opacity-60 cursor-not-allowed"
+            : status === "listening"
+            ? "bg-red-600 hover:bg-red-500 shadow-[0_0_32px_rgba(220,38,38,0.4)]"
+            : "bg-green-600 hover:bg-green-500 shadow-[0_0_32px_rgba(34,197,94,0.4)]"
+          }
+        `}
+      >
+        {/* Pulse ring when active */}
+        {isActive && (
+          <span className={`
+            absolute inset-0 rounded-full animate-ping opacity-20
+            ${status === "listening" ? "bg-red-500" : "bg-green-500"}
+          `} />
+        )}
+
+        {/* Icon */}
+        {status === "connecting" ? (
+          <svg className="w-8 h-8 animate-spin text-zinc-400" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+          </svg>
+        ) : (
+          <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 1a4 4 0 014 4v6a4 4 0 01-8 0V5a4 4 0 014-4zm-1 17.93V21h2v-2.07A8.001 8.001 0 0020 11h-2a6 6 0 01-12 0H4a8.001 8.001 0 007 7.93z"/>
+          </svg>
+        )}
+      </button>
+
+      {/* Status Label */}
+      <p className={`mt-6 text-sm font-medium tracking-wide uppercase ${
+        status === "idle" ? "text-zinc-500" :
+        status === "connecting" ? "text-zinc-400" :
+        status === "listening" ? "text-red-400" :
+        status === "speaking" ? "text-green-400" :
+        "text-red-400"
+      }`}>
+        {status === "idle" && "Click to start"}
+        {status === "connecting" && "Connecting..."}
+        {status === "listening" && "Listening"}
+        {status === "speaking" && "Speaking"}
+        {status === "error" && "Connection error"}
+      </p>
+
+      {/* Transcript Area */}
+      <div className="mt-10 w-full max-w-md space-y-3">
+        {transcript && (
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3">
+            <p className="text-xs text-zinc-500 mb-1 uppercase tracking-wide">You said</p>
+            <p className="text-sm text-zinc-200">{transcript}</p>
+          </div>
+        )}
+        {botReply && (
+          <div className="bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3">
+            <p className="text-xs text-green-500 mb-1 uppercase tracking-wide">Gensail</p>
+            <p className="text-sm text-white">{botReply}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Error */}
+      {error && (
+        <p className="mt-4 text-xs text-red-400 max-w-sm text-center">{error}</p>
+      )}
+
+      {/* Footer */}
+      <p className="absolute bottom-6 text-xs text-zinc-700">
+        Pipecat · Kokoro TTS · NVIDIA Nemotron STT
+      </p>
+    </main>
   );
 }

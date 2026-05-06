@@ -18,6 +18,8 @@ export default function Home() {
   const [botReply, setBotReply] = useState("");
   const [error, setError] = useState("");
 
+  const isConnectedRef = useRef(false);
+
   const WS_URL =
     process.env.NEXT_PUBLIC_BACKEND_WS_URL || "ws://localhost:8000/api/ws/voice";
 
@@ -31,8 +33,14 @@ export default function Home() {
       enableMic: true,
       enableCam: false,
       callbacks: {
-        onConnected: () => setStatus("listening"),
-        onDisconnected: () => setStatus("idle"),
+        onConnected: () => {
+          isConnectedRef.current = true;
+          setStatus("listening");
+        },
+        onDisconnected: () => {
+          isConnectedRef.current = false;
+          setStatus("idle");
+        },
         onError: (err) => {
           setError(String(err));
           setStatus("error");
@@ -53,9 +61,12 @@ export default function Home() {
   useEffect(() => {
     initClient();
     return () => {
-      clientRef.current?.disconnect();
+      clientRef.current?.disconnect().catch(() => {
+        // no-op: session was never started, safe to ignore
+      });
     };
   }, [initClient]);
+
 
   const handleConnect = async () => {
     try {
@@ -69,11 +80,16 @@ export default function Home() {
   };
 
   const handleDisconnect = async () => {
+  try {
     await clientRef.current?.disconnect();
-    setStatus("idle");
-    setTranscript("");
-    setBotReply("");
-  };
+  } catch {
+    // ignore if session wasn't active
+  }
+  isConnectedRef.current = false;
+  setStatus("idle");
+  setTranscript("");
+  setBotReply("");
+};
 
   const isActive = status === "listening" || status === "speaking";
 

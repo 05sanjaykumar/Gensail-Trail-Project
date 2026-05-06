@@ -3,7 +3,7 @@ fastapi
 uvicorn
 python-multipart
 pydantic
-
+python-dotenv
 # Pipecat with all needed services
 pipecat-ai[kokoro,nvidia,silero,webrtc]
 

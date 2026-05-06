@@ -1,8 +1,9 @@
+# backend/routes/audio.py
 from fastapi import APIRouter, UploadFile, File
-from services.stt import transcribe_audio
-from services.llm import generate_response
+from services.STT import transcribe_audio
+from services.LLM import generate_response
+from services.TTS import synthesize_speech
 from services.sub_agent import verify_response
-from services.tts import synthesize_speech
 
 router = APIRouter()
 

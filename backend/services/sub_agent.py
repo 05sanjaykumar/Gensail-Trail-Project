@@ -1,4 +1,4 @@
-from services.llm import generate_response
+from services.LLM import generate_response
 
 def verify_response(response: str) -> str:
     prompt = f"""

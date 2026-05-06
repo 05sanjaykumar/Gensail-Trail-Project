@@ -20,7 +20,7 @@ def get_llm_context():
         messages=[{
             "role": "system",
             "content": (
-                "You are a helpful, concise voice assistant for Gensail. "
+                "You are a helpful, concise voice assistant for AI Assistant. "
                 "Keep all responses short and conversational — max 2-3 sentences. "
                 "Never use markdown, bullet points, or formatting in responses."
             )

@@ -33,7 +33,7 @@ async def voice_websocket(websocket: WebSocket):
             vad_analyzer=SileroVADAnalyzer(
                 params=VADParams(stop_secs=0.5)
             ),
-            vad_audio_passthrough=True,
+            vad_audio_passthrough=False,
             serializer=ProtobufFrameSerializer(),
         ),
     )

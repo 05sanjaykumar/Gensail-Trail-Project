@@ -98,7 +98,7 @@ export default function Home() {
       {/* Header */}
       <div className="mb-12 text-center">
         <h1 className="text-3xl font-semibold tracking-tight text-white">
-          Gensail Voice AI
+          Voice AI
         </h1>
         <p className="text-sm text-zinc-500 mt-1">
           Low-latency voice agent · Single environment
@@ -168,7 +168,7 @@ export default function Home() {
         )}
         {botReply && (
           <div className="bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3">
-            <p className="text-xs text-green-500 mb-1 uppercase tracking-wide">Gensail</p>
+            <p className="text-xs text-green-500 mb-1 uppercase tracking-wide">AI Assistant</p>
             <p className="text-sm text-white">{botReply}</p>
           </div>
         )}

@@ -4,8 +4,9 @@ uvicorn
 python-multipart
 pydantic
 python-dotenv
+
 # Pipecat with all needed services
-pipecat-ai[kokoro,nvidia,silero,webrtc]
+pipecat-ai[kokoro,nvidia,silero,websocket]
 
 # LLM
 groq
@@ -13,5 +14,5 @@ groq
 # Audio
 soundfile
 
-# Env
-python-dotenv
+# NumPy (pinned to prevent Kokoro from breaking it at runtime)
+numpy>=2.0.2,<3.0.0

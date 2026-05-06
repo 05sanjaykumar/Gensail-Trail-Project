@@ -26,5 +26,4 @@ def get_llm_context():
             )
         }]
     )
-    llm = get_llm_service()
-    return llm.create_context_aggregator(context)
+    return LLMContextAggregatorPair(context)

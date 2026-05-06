@@ -41,13 +41,13 @@ async def voice_websocket(websocket: WebSocket):
     context_aggregator = get_llm_context()
 
     pipeline = Pipeline([
-        transport.input(),         # mic audio in
-        stt,                       # speech → text
-        context_aggregator.user(), # add user msg to context
-        llm,                       # text → response
-        tts,                       # response → audio
-        context_aggregator.assistant(), # save assistant reply
-        transport.output(),        # audio → browser
+        transport.input(),
+        stt,
+        context_aggregator.user(),
+        llm,
+        tts,
+        context_aggregator.assistant(),
+        transport.output(),
     ])
 
     task = PipelineTask(
@@ -57,7 +57,5 @@ async def voice_websocket(websocket: WebSocket):
         ),
     )
 
-    await transport.connect()
-
-    runner = PipelineRunner()
+    runner = PipelineRunner(handle_sigint=False)
     await runner.run(task)

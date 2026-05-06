@@ -1,12 +1,25 @@
-from groq import Groq
 from config import GROQ_API_KEY, LLM_MODEL
+from pipecat.services.groq import GroqLLMService
+from pipecat.processors.aggregators.openai_llm_context import (
+    OpenAILLMContext,
+    OpenAILLMContextAggregator,
+)
 
-client = Groq(api_key=GROQ_API_KEY)
-
-def generate_response(prompt: str) -> str:
-    res = client.chat.completions.create(
-        messages=[{"role": "user", "content": prompt}],
-        model=LLM_MODEL
+def get_llm_service():
+    return GroqLLMService(
+        api_key=GROQ_API_KEY,
+        model=LLM_MODEL,
     )
 
-    return res.choices[0].message.content
+def get_llm_context():
+    context = OpenAILLMContext(
+        messages=[{
+            "role": "system",
+            "content": (
+                "You are a helpful, concise voice assistant for Gensail. "
+                "Keep all responses short and conversational — max 2-3 sentences. "
+                "Never use markdown, bullet points, or formatting in responses."
+            )
+        }]
+    )
+    return OpenAILLMContextAggregator(context)

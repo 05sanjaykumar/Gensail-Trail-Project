@@ -27,8 +27,8 @@ export default function Home() {
     const client = new PipecatClient({
       transport: new WebSocketTransport({
         serializer: new ProtobufFrameSerializer(),
-        recorderSampleRate: 16000,
-        playerSampleRate: 16000,
+        recorderSampleRate: 24000,
+        playerSampleRate: 24000,
       }),
       enableMic: true,
       enableCam: false,

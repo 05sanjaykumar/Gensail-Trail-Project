@@ -28,7 +28,7 @@ async def voice_websocket(websocket: WebSocket):
         params=FastAPIWebsocketParams(
             audio_in_enabled=True,
             audio_out_enabled=True,
-            add_wav_header=True,
+            add_wav_header=False,
             vad_enabled=True,
             vad_analyzer=SileroVADAnalyzer(
                 params=VADParams(stop_secs=0.5)

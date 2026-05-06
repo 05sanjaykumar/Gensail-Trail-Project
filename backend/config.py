@@ -6,7 +6,7 @@ load_dotenv()
 
 # LLM
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-LLM_MODEL = "llama3-70b-8192"
+LLM_MODEL = "llama-3.1-8b-instant"
 
 # STT - NVIDIA Nemotron
 NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY")

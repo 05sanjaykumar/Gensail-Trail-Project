@@ -22,3 +22,23 @@ pip install -r requirements.txt
 ```
 python -m uvicorn main:app --reload
 ```
+
+
+# To install voice
+
+```
+brew install espeak-ng
+```
+
+
+# Available Voices
+
+Some popular ones from the model:
+
+- af_heart — warm American female
+
+- af_sky — lighter American female
+
+- bf_emma — British female
+
+- am_adam — American male

@@ -1,18 +1,20 @@
 from config import GROQ_API_KEY, LLM_MODEL
 from pipecat.services.groq import GroqLLMService
-from pipecat.processors.aggregators.openai_llm_context import (
-    OpenAILLMContext,
-    OpenAILLMContextAggregator,
-)
+from pipecat.processors.aggregators.llm_context import LLMContext
+from pipecat.processors.aggregators.llm_response_universal import LLMContextAggregatorPair
 
 def get_llm_service():
     return GroqLLMService(
         api_key=GROQ_API_KEY,
-        model=LLM_MODEL,
+        settings=GroqLLMService.Settings(
+            model=LLM_MODEL,
+            temperature=0.7,
+            max_completion_tokens=1024,
+        ),
     )
 
 def get_llm_context():
-    context = OpenAILLMContext(
+    context = LLMContext(
         messages=[{
             "role": "system",
             "content": (
@@ -22,4 +24,5 @@ def get_llm_context():
             )
         }]
     )
-    return OpenAILLMContextAggregator(context)
+    llm = get_llm_service()
+    return llm.create_context_aggregator(context)

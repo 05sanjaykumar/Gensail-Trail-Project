@@ -9,6 +9,7 @@ from pipecat.transports.websocket.fastapi import (
 )
 from pipecat.audio.vad.silero import SileroVADAnalyzer
 from pipecat.audio.vad.vad_analyzer import VADParams
+from pipecat.serializers.protobuf import ProtobufFrameSerializer
 from services.STT import get_stt_service
 from services.LLM import get_llm_service, get_llm_context
 from services.TTS import get_tts_service
@@ -21,6 +22,7 @@ def health():
 
 @router.websocket("/ws/voice")
 async def voice_websocket(websocket: WebSocket):
+    await websocket.accept()
     transport = FastAPIWebsocketTransport(
         websocket=websocket,
         params=FastAPIWebsocketParams(
@@ -32,6 +34,7 @@ async def voice_websocket(websocket: WebSocket):
                 params=VADParams(stop_secs=0.5)
             ),
             vad_audio_passthrough=True,
+            serializer=ProtobufFrameSerializer(),
         ),
     )
 

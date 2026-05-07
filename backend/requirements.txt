@@ -16,3 +16,6 @@ soundfile
 
 # NumPy (pinned to prevent Kokoro from breaking it at runtime)
 numpy>=2.0.2,<3.0.0
+
+#install modal
+modal

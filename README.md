@@ -4,6 +4,12 @@ A real-time, low-latency voice AI assistant built with [Pipecat](https://github.
 
 ---
 
+# Video Demo
+
+https://www.linkedin.com/feed/update/urn:li:activity:7457791734132019200/
+
+---
+
 ## Architecture
 
 ```
